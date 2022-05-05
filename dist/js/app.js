@@ -3301,7 +3301,7 @@ global.copyStringToClipboard = function () {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../json/config":124,"core-js/modules/es6.array.filter.js":89,"core-js/modules/es6.array.find-index.js":90,"core-js/modules/es6.array.find.js":91,"core-js/modules/es6.array.from.js":92,"core-js/modules/es6.array.iterator.js":93,"core-js/modules/es6.array.map.js":94,"core-js/modules/es6.array.slice.js":95,"core-js/modules/es6.function.name.js":96,"core-js/modules/es6.object.assign.js":97,"core-js/modules/es6.object.keys.js":98,"core-js/modules/es6.object.to-string.js":99,"core-js/modules/es6.regexp.constructor.js":100,"core-js/modules/es6.regexp.match.js":102,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.search.js":104,"core-js/modules/es6.regexp.split.js":105,"core-js/modules/es6.string.ends-with.js":107,"core-js/modules/es6.string.includes.js":108,"core-js/modules/es6.string.iterator.js":109,"core-js/modules/es6.symbol.js":112,"core-js/modules/es7.array.includes.js":113,"core-js/modules/web.dom.iterable.js":114}],117:[function(require,module,exports){
+},{"../json/config":122,"core-js/modules/es6.array.filter.js":89,"core-js/modules/es6.array.find-index.js":90,"core-js/modules/es6.array.find.js":91,"core-js/modules/es6.array.from.js":92,"core-js/modules/es6.array.iterator.js":93,"core-js/modules/es6.array.map.js":94,"core-js/modules/es6.array.slice.js":95,"core-js/modules/es6.function.name.js":96,"core-js/modules/es6.object.assign.js":97,"core-js/modules/es6.object.keys.js":98,"core-js/modules/es6.object.to-string.js":99,"core-js/modules/es6.regexp.constructor.js":100,"core-js/modules/es6.regexp.match.js":102,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.search.js":104,"core-js/modules/es6.regexp.split.js":105,"core-js/modules/es6.string.ends-with.js":107,"core-js/modules/es6.string.includes.js":108,"core-js/modules/es6.string.iterator.js":109,"core-js/modules/es6.symbol.js":112,"core-js/modules/es7.array.includes.js":113,"core-js/modules/web.dom.iterable.js":114}],117:[function(require,module,exports){
 "use strict";
 
 require("core-js/modules/es6.regexp.replace.js");
@@ -3326,12 +3326,6 @@ document.addEventListener('DOMContentLoaded', function () {
     case 'archive':
       return require('./archive').load();
 
-    case 'installation':
-      return require('./installation').load();
-
-    case 'nightly':
-      return require('./nightly').load();
-
     case 'releases':
       return require('./releases').load();
 
@@ -3343,7 +3337,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-},{"./archive":115,"./common":116,"./index":118,"./installation":119,"./nightly":120,"./releases":121,"./testimonials":122,"./upstream":123,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.split.js":105}],118:[function(require,module,exports){
+},{"./archive":115,"./common":116,"./index":118,"./releases":119,"./testimonials":120,"./upstream":121,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.split.js":105}],118:[function(require,module,exports){
 "use strict";
 
 require("core-js/modules/es6.regexp.replace.js");
@@ -3427,371 +3421,6 @@ function buildHomepageHTML(jvmVariant) {
 }
 
 },{"./common":116,"core-js/modules/es6.regexp.replace.js":103}],119:[function(require,module,exports){
-"use strict";
-
-require("core-js/modules/es6.regexp.split.js");
-
-require("core-js/modules/es6.string.link.js");
-
-require("core-js/modules/es6.function.name.js");
-
-require("core-js/modules/es6.regexp.replace.js");
-
-require("core-js/modules/es6.symbol.js");
-
-require("core-js/modules/es6.array.from.js");
-
-require("core-js/modules/es6.string.iterator.js");
-
-require("core-js/modules/es6.object.to-string.js");
-
-require("core-js/modules/es6.array.iterator.js");
-
-require("core-js/modules/web.dom.iterable.js");
-
-var _require = require('./common'),
-    detectOS = _require.detectOS,
-    findPlatform = _require.findPlatform,
-    getInstallCommands = _require.getInstallCommands,
-    getOfficialName = _require.getOfficialName,
-    getPlatformOrder = _require.getPlatformOrder,
-    loadAssetInfo = _require.loadAssetInfo,
-    orderPlatforms = _require.orderPlatforms,
-    setRadioSelectors = _require.setRadioSelectors;
-
-var _require2 = require('./common'),
-    jvmVariant = _require2.jvmVariant,
-    variant = _require2.variant;
-
-var loading = document.getElementById('loading');
-var errorContainer = document.getElementById('error-container');
-var platformSelector = document.getElementById('platform-selector');
-
-module.exports.load = function () {
-  setRadioSelectors();
-  Handlebars.registerHelper('fetchExtension', function (filename) {
-    var extension = ".".concat(filename.split('.').pop()); // Workaround to prevent extension returning as .gz
-
-    if (extension == '.gz') {
-      extension = '.tar.gz';
-    }
-
-    return extension;
-  });
-  loadAssetInfo(variant, jvmVariant, 'ga', undefined, undefined, 'latest', 'adoptopenjdk', buildInstallationHTML, function () {
-    errorContainer.innerHTML = '<p>Error... no installation information has been found!</p>';
-    loading.innerHTML = ''; // remove the loading dots
-  });
-};
-
-function buildInstallationHTML(releasesJson) {
-  // create an array of the details for each asset that is attached to a release
-  var assetArray = releasesJson[0].binaries;
-  var ASSETARRAY = []; // for each asset attached to this release, check if it's a valid binary, then add a download block for it...
-
-  assetArray.forEach(function (eachAsset) {
-    var ASSETOBJECT = {};
-    ASSETOBJECT.thisPlatform = findPlatform(eachAsset); // check if the platform name is recognised...
-
-    if (ASSETOBJECT.thisPlatform) {
-      ASSETOBJECT.thisPlatformOrder = getPlatformOrder(ASSETOBJECT.thisPlatform);
-      ASSETOBJECT.thisOfficialName = getOfficialName(ASSETOBJECT.thisPlatform) + ' ' + eachAsset.image_type;
-      ASSETOBJECT.thisPlatformType = (ASSETOBJECT.thisPlatform + '-' + eachAsset.image_type).toUpperCase();
-      ASSETOBJECT.thisPlatformExists = true;
-      ASSETOBJECT.thisBinaryLink = eachAsset.package.link;
-      ASSETOBJECT.thisBinaryFilename = eachAsset.package.name;
-      ASSETOBJECT.thisChecksum = eachAsset.package.checksum;
-      ASSETOBJECT.thisChecksumLink = eachAsset.package.checksum_link;
-      ASSETOBJECT.os = eachAsset.os;
-      ASSETOBJECT.thisInstallCommands = getInstallCommands(ASSETOBJECT.os);
-      ASSETOBJECT.thisUnzipCommand = ASSETOBJECT.thisInstallCommands.installCommand.replace('FILENAME', ASSETOBJECT.thisBinaryFilename);
-      ASSETOBJECT.thisChecksumCommand = ASSETOBJECT.thisInstallCommands.checksumCommand.replace('FILENAME', ASSETOBJECT.thisBinaryFilename); // the check sum auto command hint is always printed,
-      // so we just configure with empty string if not present
-
-      ASSETOBJECT.thisChecksumAutoCommandHint = ASSETOBJECT.thisInstallCommands.checksumAutoCommandHint || ''; // build download sha256 and verify auto command
-
-      var thisChecksumAutoCommand = ASSETOBJECT.thisInstallCommands.checksumAutoCommand;
-      var sha256FileName = ASSETOBJECT.thisChecksumLink;
-      var separator = sha256FileName.lastIndexOf('/');
-
-      if (separator > -1) {
-        sha256FileName = sha256FileName.substring(separator + 1);
-      }
-
-      ASSETOBJECT.thisChecksumAutoCommand = thisChecksumAutoCommand.replace(/FILEHASHURL/g, ASSETOBJECT.thisChecksumLink).replace(/FILEHASHNAME/g, sha256FileName).replace(/FILENAME/g, ASSETOBJECT.thisBinaryFilename);
-      var dirName = releasesJson[0].release_name + (eachAsset.image_type === 'jre' ? '-jre' : '');
-      ASSETOBJECT.thisPathCommand = ASSETOBJECT.thisInstallCommands.pathCommand.replace('DIRNAME', dirName);
-
-      if (ASSETOBJECT.thisPlatformExists) {
-        ASSETARRAY.push(ASSETOBJECT);
-      }
-    }
-  });
-  var template = Handlebars.compile(document.getElementById('template').innerHTML);
-  document.getElementById('installation-template').innerHTML = template({
-    htmlTemplate: orderPlatforms(ASSETARRAY)
-  });
-  /*global hljs*/
-
-  hljs.initHighlightingOnLoad();
-  setInstallationPlatformSelector(ASSETARRAY);
-  attachCopyButtonListeners();
-  window.onhashchange = displayInstallPlatform;
-  loading.innerHTML = ''; // remove the loading dots
-
-  var installationContainer = document.getElementById('installation-container');
-  installationContainer.className = installationContainer.className.replace(/(?:^|\s)hide(?!\S)/g, ' animated fadeIn ');
-}
-
-function attachCopyButtonListeners() {
-  document.querySelectorAll('.copy-code-block').forEach(function (codeBlock) {
-    var target = codeBlock.querySelector('code.cmd-block');
-    codeBlock.querySelector('.copy-code-button').addEventListener('click', function () {
-      return copyElementTextContent(target);
-    });
-  });
-}
-
-function displayInstallPlatform() {
-  var platformHash = window.location.hash.substr(1).toUpperCase();
-  var thisPlatformInstallation = document.getElementById("installation-container-".concat(platformHash));
-  unselectInstallPlatform();
-
-  if (thisPlatformInstallation) {
-    platformSelector.value = platformHash;
-    thisPlatformInstallation.classList.remove('hide');
-  } else {
-    var currentValues = [];
-    Array.from(platformSelector.options).forEach(function (eachOption) {
-      currentValues.push(eachOption.value);
-    });
-    platformSelector.value = 'unknown';
-  }
-}
-
-function unselectInstallPlatform() {
-  var platformInstallationDivs = document.getElementById('installation-container').getElementsByClassName('installation-single-platform');
-
-  for (var i = 0; i < platformInstallationDivs.length; i++) {
-    platformInstallationDivs[i].classList.add('hide');
-  }
-}
-
-function setInstallationPlatformSelector(thisReleasePlatforms) {
-  if (!platformSelector) {
-    return;
-  }
-
-  if (platformSelector.options.length === 1) {
-    thisReleasePlatforms.forEach(function (eachPlatform) {
-      var op = new Option();
-      op.value = eachPlatform.thisPlatformType;
-      op.text = eachPlatform.thisOfficialName;
-      platformSelector.options.add(op);
-    });
-  }
-
-  var OS = detectOS();
-
-  if (OS && window.location.hash.length < 1) {
-    platformSelector.value = OS.searchableName;
-    window.location.hash = platformSelector.value.toLowerCase();
-  }
-
-  displayInstallPlatform();
-
-  platformSelector.onchange = function () {
-    window.location.hash = platformSelector.value.toLowerCase();
-    displayInstallPlatform();
-  };
-}
-
-function copyElementTextContent(target) {
-  var text = target.textContent;
-  var input = document.createElement('input');
-  input.value = text;
-  document.body.appendChild(input);
-  input.select();
-  document.execCommand('copy');
-  alert('Copied to clipboard');
-  document.body.removeChild(input);
-}
-
-},{"./common":116,"core-js/modules/es6.array.from.js":92,"core-js/modules/es6.array.iterator.js":93,"core-js/modules/es6.function.name.js":96,"core-js/modules/es6.object.to-string.js":99,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.split.js":105,"core-js/modules/es6.string.iterator.js":109,"core-js/modules/es6.string.link.js":110,"core-js/modules/es6.symbol.js":112,"core-js/modules/web.dom.iterable.js":114}],120:[function(require,module,exports){
-"use strict";
-
-require("core-js/modules/es6.regexp.split.js");
-
-require("core-js/modules/es6.function.name.js");
-
-require("core-js/modules/es6.array.slice.js");
-
-require("core-js/modules/es6.string.link.js");
-
-require("core-js/modules/es6.regexp.replace.js");
-
-require("core-js/modules/es6.regexp.constructor.js");
-
-require("core-js/modules/es6.array.filter.js");
-
-var _require = require('./common'),
-    findPlatform = _require.findPlatform,
-    getOfficialName = _require.getOfficialName,
-    loadAssetInfo = _require.loadAssetInfo,
-    setRadioSelectors = _require.setRadioSelectors;
-
-var _require2 = require('./common'),
-    jvmVariant = _require2.jvmVariant,
-    variant = _require2.variant;
-
-var loading = document.getElementById('loading');
-var errorContainer = document.getElementById('error-container');
-var tableHead = document.getElementById('table-head');
-var nightlyList = document.getElementById('nightly-table');
-var numberpicker = document.getElementById('numberpicker');
-var datepicker = document.getElementById('datepicker');
-var templateString = $('#template').html(); // When nightly page loads, run:
-
-module.exports.load = function () {
-  Handlebars.registerHelper('fetchExtension', function (filename) {
-    var extension = ".".concat(filename.split('.').pop()); // Workaround to prevent extension returning as .gz
-
-    if (extension == '.gz') {
-      extension = '.tar.gz';
-    }
-
-    return extension;
-  });
-  setRadioSelectors();
-  setDatePicker();
-  populateNightly(); // run the function to populate the table on the Nightly page.
-
-  numberpicker.onchange = datepicker.onchange = function () {
-    populateNightly();
-  };
-};
-
-function setDatePicker() {
-  $(datepicker).datepicker();
-  datepicker.value = moment().format('YYYY-MM-DD');
-}
-
-function populateNightly() {
-  var handleResponse = function handleResponse(response) {
-    // if there are releases...
-    if (typeof response[0] !== 'undefined') {
-      var files = getFiles(response);
-
-      if (files.length === 0) {
-        return;
-      }
-
-      buildNightlyHTML(files);
-    }
-  };
-
-  loadAssetInfo(variant, jvmVariant, 'ea', numberpicker.value, moment(datepicker.value).format('YYYY-MM-DD'), undefined, 'adoptopenjdk', handleResponse, function () {
-    errorContainer.innerHTML = '<p>Error... no releases have been found!</p>';
-    loading.innerHTML = ''; // remove the loading dots
-  });
-}
-
-function getFiles(nightlyJson) {
-  var assets = [];
-  nightlyJson.forEach(function (release) {
-    release.binaries.forEach(function (asset) {
-      if (/(?:\.tar\.gz|\.zip)$/.test(asset.package.name) && findPlatform(asset)) {
-        assets.push({
-          release: release,
-          asset: asset
-        });
-      }
-    });
-  });
-  return assets;
-}
-
-function buildNightlyHTML(files) {
-  tableHead.innerHTML = "<tr id='table-header'>\n    <th>Platform</th>\n    <th>Type</th>\n    <th>Heap Size</th>\n    <th>Date</th>\n    <th>Binary</th>\n    <th>Installer</th>\n    <th>Checksum</th>\n    </tr>";
-  var NIGHTLYARRAY = []; // for each release...
-
-  files.forEach(function (file) {
-    // for each file attached to this release...
-    var eachAsset = file.asset;
-    var eachRelease = file.release;
-    var NIGHTLYOBJECT = {};
-    var type = eachAsset.image_type;
-    NIGHTLYOBJECT.thisPlatform = findPlatform(eachAsset); // get the searchableName, e.g. MAC or X64_LINUX.
-    // set values ready to be injected into the HTML
-
-    var publishedAt = eachRelease.timestamp;
-    NIGHTLYOBJECT.thisReleaseName = eachRelease.release_name.slice(0, 12);
-    NIGHTLYOBJECT.thisType = type;
-    NIGHTLYOBJECT.thisHeapSize = eachAsset.heap_size;
-    NIGHTLYOBJECT.thisReleaseDay = moment(publishedAt).format('D');
-    NIGHTLYOBJECT.thisReleaseMonth = moment(publishedAt).format('MMMM');
-    NIGHTLYOBJECT.thisReleaseYear = moment(publishedAt).format('YYYY');
-    NIGHTLYOBJECT.thisGitLink = eachRelease.release_link;
-    NIGHTLYOBJECT.thisOfficialName = getOfficialName(NIGHTLYOBJECT.thisPlatform);
-    NIGHTLYOBJECT.thisBinaryLink = eachAsset.package.link;
-    NIGHTLYOBJECT.thisBinarySize = Math.floor(eachAsset.package.size / 1000 / 1000);
-    NIGHTLYOBJECT.thisChecksum = eachAsset.package.checksum;
-
-    if (eachAsset.installer) {
-      NIGHTLYOBJECT.thisInstallerLink = eachAsset.installer.link;
-    }
-
-    NIGHTLYARRAY.push(NIGHTLYOBJECT);
-  });
-  var template = Handlebars.compile(templateString);
-  nightlyList.innerHTML = template({
-    htmlTemplate: NIGHTLYARRAY
-  });
-  setSearchLogic();
-  loading.innerHTML = ''; // remove the loading dots
-  // show the table, with animated fade-in
-
-  nightlyList.className = nightlyList.className.replace(/(?:^|\s)hide(?!\S)/g, ' animated fadeIn ');
-  setTableRange(); // if the table has a scroll bar, show text describing how to horizontally scroll
-
-  var scrollText = document.getElementById('scroll-text');
-  var tableDisplayWidth = document.getElementById('nightly-list').clientWidth;
-  var tableScrollWidth = document.getElementById('nightly-list').scrollWidth;
-
-  if (tableDisplayWidth != tableScrollWidth) {
-    scrollText.className = scrollText.className.replace(/(?:^|\s)hide(?!\S)/g, '');
-  }
-}
-
-function setTableRange() {
-  var rows = $('#nightly-table tr');
-  var selectedDate = moment(datepicker.value, 'MM-DD-YYYY').format();
-
-  for (var i = 0; i < rows.length; i++) {
-    var thisDate = rows[i].getElementsByClassName('nightly-release-date')[0].innerHTML;
-    var thisDateMoment = moment(thisDate, 'D MMMM YYYY').format();
-    var isAfter = moment(thisDateMoment).isAfter(selectedDate);
-
-    if (isAfter) {
-      rows[i].classList.add('hide');
-    } else {
-      rows[i].classList.remove('hide');
-    }
-  }
-}
-
-function setSearchLogic() {
-  // logic for the realtime search box...
-  var $rows = $('#nightly-table tr');
-  $('#search').keyup(function () {
-    var reg = RegExp('^(?=.*' + $.trim($(this).val()).split(/\s+/).join(')(?=.*') + ').*$', 'i');
-    $rows.show().filter(function () {
-      return !reg.test($(this).text().replace(/\s+/g, ' '));
-    }).hide();
-  });
-}
-
-},{"./common":116,"core-js/modules/es6.array.filter.js":89,"core-js/modules/es6.array.slice.js":95,"core-js/modules/es6.function.name.js":96,"core-js/modules/es6.regexp.constructor.js":100,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.split.js":105,"core-js/modules/es6.string.link.js":110}],121:[function(require,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -4139,7 +3768,7 @@ function filterTable(string, type, string1) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./common":116,"core-js/modules/es6.array.find.js":91,"core-js/modules/es6.array.from.js":92,"core-js/modules/es6.array.iterator.js":93,"core-js/modules/es6.array.slice.js":95,"core-js/modules/es6.function.name.js":96,"core-js/modules/es6.object.to-string.js":99,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.split.js":105,"core-js/modules/es6.set.js":106,"core-js/modules/es6.string.iterator.js":109,"core-js/modules/es6.string.link.js":110,"core-js/modules/es6.string.starts-with.js":111,"core-js/modules/es6.symbol.js":112,"core-js/modules/es7.array.includes.js":113,"core-js/modules/web.dom.iterable.js":114}],122:[function(require,module,exports){
+},{"./common":116,"core-js/modules/es6.array.find.js":91,"core-js/modules/es6.array.from.js":92,"core-js/modules/es6.array.iterator.js":93,"core-js/modules/es6.array.slice.js":95,"core-js/modules/es6.function.name.js":96,"core-js/modules/es6.object.to-string.js":99,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.split.js":105,"core-js/modules/es6.set.js":106,"core-js/modules/es6.string.iterator.js":109,"core-js/modules/es6.string.link.js":110,"core-js/modules/es6.string.starts-with.js":111,"core-js/modules/es6.symbol.js":112,"core-js/modules/es7.array.includes.js":113,"core-js/modules/web.dom.iterable.js":114}],120:[function(require,module,exports){
 "use strict";
 
 module.exports.load = function () {
@@ -4151,7 +3780,7 @@ module.exports.load = function () {
   });
 };
 
-},{}],123:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -4524,7 +4153,7 @@ function filterTable(string, type, string1) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./common":116,"core-js/modules/es6.array.find.js":91,"core-js/modules/es6.array.from.js":92,"core-js/modules/es6.array.iterator.js":93,"core-js/modules/es6.array.slice.js":95,"core-js/modules/es6.function.name.js":96,"core-js/modules/es6.object.to-string.js":99,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.search.js":104,"core-js/modules/es6.regexp.split.js":105,"core-js/modules/es6.set.js":106,"core-js/modules/es6.string.iterator.js":109,"core-js/modules/es6.string.link.js":110,"core-js/modules/es6.string.starts-with.js":111,"core-js/modules/es6.symbol.js":112,"core-js/modules/es7.array.includes.js":113,"core-js/modules/web.dom.iterable.js":114}],124:[function(require,module,exports){
+},{"./common":116,"core-js/modules/es6.array.find.js":91,"core-js/modules/es6.array.from.js":92,"core-js/modules/es6.array.iterator.js":93,"core-js/modules/es6.array.slice.js":95,"core-js/modules/es6.function.name.js":96,"core-js/modules/es6.object.to-string.js":99,"core-js/modules/es6.regexp.replace.js":103,"core-js/modules/es6.regexp.search.js":104,"core-js/modules/es6.regexp.split.js":105,"core-js/modules/es6.set.js":106,"core-js/modules/es6.string.iterator.js":109,"core-js/modules/es6.string.link.js":110,"core-js/modules/es6.string.starts-with.js":111,"core-js/modules/es6.symbol.js":112,"core-js/modules/es7.array.includes.js":113,"core-js/modules/web.dom.iterable.js":114}],122:[function(require,module,exports){
 module.exports={
   "variants": [
     {
