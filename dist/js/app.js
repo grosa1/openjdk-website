@@ -3395,7 +3395,8 @@ function removeRadioButtons() {
 
 function buildHomepageHTML(jvmVariant) {
   if (jvmVariant == 'hotspot') {
-    dlLatest.href = 'https://adoptium.net?variant=' + variant;
+    var version = variant.replace(/\D/g, '');
+    dlLatest.href = 'https://adoptium.net/temurin/releases?version=' + version;
     dlLatestText.textContent = 'adoptium.net';
     dlVersionText.innerHTML = 'AdoptOpenJDK has moved...';
   } else if (jvmVariant == 'openj9') {
@@ -3434,13 +3435,13 @@ require("core-js/modules/es6.array.from.js");
 
 require("core-js/modules/es6.regexp.split.js");
 
+require("core-js/modules/es6.regexp.replace.js");
+
 require("core-js/modules/es7.array.includes.js");
 
 require("core-js/modules/es6.array.find.js");
 
 require("core-js/modules/es6.string.link.js");
-
-require("core-js/modules/es6.regexp.replace.js");
 
 require("core-js/modules/es6.set.js");
 
@@ -3485,6 +3486,9 @@ module.exports.load = function () {
   });
   Handlebars.registerHelper('fetchArch', function (title) {
     return title.split(' ')[1];
+  });
+  Handlebars.registerHelper('formatVersion', function (version) {
+    return version.replace(/\D/g, '');
   });
   Handlebars.registerHelper('fetchExtension', function (filename) {
     var extension = ".".concat(filename.split('.').pop()); // Workaround to prevent extension returning as .gz
