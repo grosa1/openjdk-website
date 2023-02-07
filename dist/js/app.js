@@ -1150,7 +1150,7 @@ global.copyStringToClipboard = function () {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../json/config":55,"core-js/modules/web.dom.iterable.js":47}],50:[function(require,module,exports){
+},{"../json/config":54,"core-js/modules/web.dom.iterable.js":47}],50:[function(require,module,exports){
 "use strict";
 
 const {
@@ -1172,14 +1172,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return require('./archive').load();
     case 'releases':
       return require('./releases').load();
-    case 'testimonials':
-      return require('./testimonials').load();
     case 'upstream':
       return require('./upstream').load();
   }
 });
 
-},{"./archive":48,"./common":49,"./index":51,"./releases":52,"./testimonials":53,"./upstream":54}],51:[function(require,module,exports){
+},{"./archive":48,"./common":49,"./index":51,"./releases":52,"./upstream":53}],51:[function(require,module,exports){
 "use strict";
 
 const {
@@ -1507,18 +1505,6 @@ function filterTable(string, type, string1) {
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./common":49,"core-js/modules/web.dom.iterable.js":47}],53:[function(require,module,exports){
-"use strict";
-
-module.exports.load = () => {
-  $('#testimonials').slick({
-    dots: true,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    pauseOnHover: true
-  });
-};
-
-},{}],54:[function(require,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -1774,7 +1760,7 @@ function filterTable(string, type, string1) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./common":49,"core-js/modules/web.dom.iterable.js":47}],55:[function(require,module,exports){
+},{"./common":49,"core-js/modules/web.dom.iterable.js":47}],54:[function(require,module,exports){
 module.exports={
   "variants": [
     {
